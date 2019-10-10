@@ -1,0 +1,21 @@
+{
+  "name": "practice-english-skill",
+  "version": "0.0.1",
+  "description": "Practice english with Alexa",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "jest": {
+    "verbose": true
+  },
+  "author": "Sergio Sanchez",
+  "dependencies": {
+    "ask-sdk-core": "^2.7.0",
+    "ask-sdk-model": "^1.18.0"
+  },
+  "devDependencies": {
+    "alexa-skill-test-framework": "^1.2.4",
+    "jest": "^24.9.0"
+  }
+}

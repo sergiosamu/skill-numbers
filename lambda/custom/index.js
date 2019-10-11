@@ -3,6 +3,7 @@
 // session persistence, api calls, and more.
 const Alexa = require('ask-sdk-core');
 const numberGenerator = require('./number_generator.js');
+const Resources = require('./resources.js');
 
 const DIALOG_STATE = {
     WAITING_DIGITS: 'digits',
@@ -23,7 +24,7 @@ const helper = {
         sessionAttributes.numberToGuess=randomNumber;
         sessionAttributes.dialogState=DIALOG_STATE.WAITING_NUMBER;
             
-        var speakOutput = helper.forceEnglish("Can you say the number corresponding to the digits <prosody rate=\"x-slow\"><say-as interpret-as=\"digits\">" + randomNumber + "</say-as></prosody>?");
+        var speakOutput = helper.forceEnglish(Resources.text.sayNumberForDigits + " <prosody rate=\"x-slow\"><say-as interpret-as=\"digits\">" + randomNumber + "</say-as></prosody>?");
         var speakReprompt = speakOutput;
 
         return handlerInput.responseBuilder
@@ -33,8 +34,8 @@ const helper = {
     },
     
     askForDigits(handlerInput) {
-        var speakOutput = helper.forceEnglish("The number of digits must be between 2 and 9 digits. How many digits do you want to practice with?");
-        var speakReprompt = helper.forceEnglish("Can you tell me a number be between 2 and 9 digits?");
+        var speakOutput = helper.forceEnglish(Resources.text.howManyDigits);
+        var speakReprompt = helper.forceEnglish(Resources.text.numberInRange);
         
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         sessionAttributes.dialogState=DIALOG_STATE.WAITING_DIGITS;
@@ -50,14 +51,14 @@ const helper = {
         sessionAttributes.dialogState=DIALOG_STATE.WAITING_RETRY_CONFRMATION;
 
         return handlerInput.responseBuilder
-            .speak("Sorry but I didn't understand. Do you want to play again or change digits?")
-            .reprompt("Say yes if you want you play again or no to exit the skill")
+            .speak(Resources.text.noUnderstand)
+            .reprompt(Resources.text.retry)
             .getResponse();
     },
 
     incorrectAnswer(handlerInput) {
-        var speakOutput = helper.forceEnglish("Incorrect answer. The correct number is " + sessionAttributes.numberToGuess + ". Do you want to try again?");
-        var speakReprompt = helper.forceEnglish("Say yes if you want to try again");
+        var speakOutput = helper.forceEnglish(Resources.text.incorrectAnswer + sessionAttributes.numberToGuess + ". " + Resources.text.tryAgain);
+        var speakReprompt = helper.forceEnglish(Resources.text.retry);
 
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
@@ -76,8 +77,8 @@ const LaunchRequestHandler = {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'LaunchRequest';
     },
     handle(handlerInput) {
-        const speakOutput = helper.forceEnglish("Let's practice numbers. How many digits do you want to practice with?");
-        const speaKReprompt = helper.forceEnglish("Tell me a number of digits between 2 and 9 to start practicing");
+        const speakOutput = helper.forceEnglish(Resources.text.practice);
+        const speaKReprompt = helper.forceEnglish(Resources.text.tellDigits);
         
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         sessionAttributes.dialogState=DIALOG_STATE.WAITING_DIGITS;
@@ -159,8 +160,8 @@ const GuessNumberIntentHandler = {
                 sessionAttributes.numberToGuess=null;
                 sessionAttributes.dialogState=DIALOG_STATE.WAITING_RETRY_CONFRMATION
 
-                var speakOutput = helper.forceEnglish('Awesome!! You nailed it. Do you want to play again?');
-                var speakReprompt = helper.forceEnglish('Say yes if you want to play again or no to exit the skill');
+                var speakOutput = helper.forceEnglish(Resources.text.correctAnswer);
+                var speakReprompt = helper.forceEnglish(Resources.text.retry);
 
                 return handlerInput.responseBuilder
                     .speak(speakOutput)
@@ -180,7 +181,7 @@ const HelpIntentHandler = {
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.HelpIntent';
     },
     handle(handlerInput) {
-        const speakOutput = forceEnglish('You can say a number of digits and I will tell you the digits for you to say the complete number');
+        const speakOutput = forceEnglish(Resources.text.help);
 
         return helper.askForDigits(handlerInput)
 
@@ -223,7 +224,7 @@ const NoIntentHandler = {
 
         } else {
         
-            const speakOutput = helper.forceEnglish("Thanks for playing. Goodbye!");
+            const speakOutput = helper.forceEnglish(Resources.text.thanks);
             return handlerInput.responseBuilder
                 .speak(speakOutput)
                 .getResponse();
@@ -285,7 +286,7 @@ const ErrorHandler = {
     },
     handle(handlerInput, error) {
         console.log(`~~~~ Error handled: ${error.stack}`);
-        const speakOutput = `Sorry, I had trouble doing what you asked. Please try again.`;
+        const speakOutput = Resources.text.error;
 
         return handlerInput.responseBuilder
             .speak(speakOutput)

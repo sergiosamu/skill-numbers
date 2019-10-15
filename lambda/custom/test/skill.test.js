@@ -7,6 +7,13 @@ Run with 'mocha examples/skill-sample-nodejs-ask2/helloworld-tests.js'.
 
 // include the testing framework
 const alexaTest = require('alexa-skill-test-framework');
+const Resources = require('../resources.js');
+
+const DIALOG_STATE = {
+    WAITING_DIGITS: 'digits',
+    WAITING_NUMBER: 'numbers',
+    WAITING_RETRY_CONFRMATION: 'retry'
+}
 
 // initialize the testing framework
 alexaTest.initialize(
@@ -15,7 +22,6 @@ alexaTest.initialize(
 	"amzn1.ask.account.VOID");
 
 describe ("Launch request", () => {
-	//console.log(alexaTest.getLaunchRequest());
 	alexaTest.test([
 		{
 			request: alexaTest.getLaunchRequest(),
@@ -28,17 +34,41 @@ describe ("Launch request", () => {
 });
 
 describe ("Ask digits request", () => {
+
 	alexaTest.test([
 		{
-			request: alexaTest.getIntentRequest("AskNumberIntent",{digits:1}),
-			says: "The number of digits must be between 2 and 6 digits. Can you tell me a different number?"
+			request: alexaTest.getIntentRequest("AskNumberIntent"),
+			saysLike: "The number of digits must be between"
 		}
 	]);
 
 	alexaTest.test([
 		{
-			request: alexaTest.getIntentRequest("AskNumberIntent",{digits:7}),
-			says: "The number of digits must be between 2 and 6 digits. Can you tell me a different number?"
+			request: alexaTest.getIntentRequest("AskNumberIntent",{digits:Resources.MIN_DIGITS-1}),
+			saysLike: "Sorry but I didn't understand",
+			withSessionAttributes: {
+				dialogState: DIALOG_STATE.WAITING_NUMBER
+			}
+		}
+	]);
+
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("AskNumberIntent",{digits:Resources.MIN_DIGITS-1}),
+			saysLike: "The number of digits must be between",
+			withSessionAttributes: {
+				dialogState: DIALOG_STATE.WAITING_DIGITS
+			}
+		}
+	]);
+
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("AskNumberIntent",{digits:Resources.MAX_DIGITS+1}),
+			saysLike: "The number of digits must be between",
+			withSessionAttributes: {
+				dialogState: DIALOG_STATE.WAITING_DIGITS
+			}
 		}
 	]);
 
@@ -58,9 +88,10 @@ describe ("Try to guess number", () => {
 	alexaTest.test([
 		{
 			request: alexaTest.getIntentRequest("GuessNumberIntent",{guess:123}),
-			says: "Awesome!! You nailed it. Do you want to play again?",
+			saysLike: "Awesome!! You nailed it",
 			withSessionAttributes: {
-				numberToGuess:123
+				numberToGuess:123,
+				dialogState: DIALOG_STATE.WAITING_NUMBER
 			}
 		}
 	]);
@@ -70,48 +101,163 @@ describe ("Try to guess number", () => {
 			request: alexaTest.getIntentRequest("GuessNumberIntent",{guess:123}),
 			saysLike: "Incorrect answer",
 			withSessionAttributes: {
-				numberToGuess:321
+				numberToGuess:321,
+				dialogState: DIALOG_STATE.WAITING_NUMBER
 			}
 		}
 	]);
 
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("GuessNumberIntent",{guess:3}),
+			saysLike: "Can you say the number",
+			withSessionAttributes: {
+				dialogState: DIALOG_STATE.WAITING_DIGITS
+			}
+		}
+	]);	
+
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("GuessNumberIntent",{guess:3}),
+			saysLike: "Sorry but I didn't understand",
+			withSessionAttributes: {
+				dialogState: DIALOG_STATE.WAITING_RETRY_CONFRMATION
+			}
+		}
+	]);		
+
 });
 
-/*
-describe("Hello World Skill", function () {
-	// tests the behavior of the skill's LaunchRequest
-	describe("LaunchRequest", function () {
-		alexaTest.test([
-			{
-				request: alexaTest.getLaunchRequest(),
-				says: "Welcome to the Alexa Skills Kit, you can say hello!",
-				repromptsNothing: true,
-				shouldEndSession: true
+describe ("Change digits", () => {
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("ChangeDigitsIntent",{digits:3}),
+			saysLike: "Can you say the number",
+			hasAttributes: {
+				"numberToGuess": (n) => {return n > 99 && n < 1000}
 			}
-		]);
-	});
-	
-	// tests the behavior of the skill's HelloWorldIntent
-	describe("HelloWorldIntent", function () {
-		alexaTest.test([
-			{
-				request: alexaTest.getIntentRequest("HelloWorldIntent"),
-				says: "Hello World!", repromptsNothing: true, shouldEndSession: true,
-				hasAttributes: {
-					foo: 'bar'
-				}
+		}
+	]);
+
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("ChangeDigitsIntent"),
+			saysLike: "The number of digits",
+			hasAttributes: {
+				numberLength: null
 			}
-		]);
-	});
-	
-	// tests the behavior of the skill's HelloWorldIntent with like operator
-	describe("HelloWorldIntent like", function () {
-		alexaTest.test([
-			{
-				request: alexaTest.getIntentRequest("HelloWorldIntent"),
-				saysLike: "World", repromptsNothing: true, shouldEndSession: true
-			}
-		]);
-	});
+		}
+	]);
 });
-*/
+
+describe ("Other number", () => {
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("OtherNumberIntent"),
+			saysLike: "Can you say the number",
+			withSessionAttributes: {
+				dialogState: DIALOG_STATE.WAITING_NUMBER
+			}
+		}
+	]);
+
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("OtherNumberIntent"),
+			saysLike: "The number of digits must",
+			withSessionAttributes: {
+				dialogState: DIALOG_STATE.WAITING_DIGITS
+			}
+		}
+	]);
+
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("OtherNumberIntent"),
+			saysLike: "Sorry but I didn't understand",
+			withSessionAttributes: {
+				dialogState: DIALOG_STATE.WAITING_RETRY_CONFRMATION
+			}
+		}
+	]);
+});
+
+describe ("Help", () => {
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("AMAZON.HelpIntent"),
+			saysLike: "You can say a number",
+			hasAttributes: {
+				numberLength: null,
+				dialogState: DIALOG_STATE.WAITING_DIGITS
+			}
+		}
+	]);
+});
+
+describe ("Yes", () => {
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("AMAZON.YesIntent"),
+			saysLike: "The number of digits must be",
+			withSessionAttributes: {
+				dialogState: DIALOG_STATE.WAITING_DIGITS
+			}
+		}
+	]);
+
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("AMAZON.YesIntent"),
+			saysLike: Resources.text.incorrectAnswer,
+			withSessionAttributes: {
+				dialogState: DIALOG_STATE.WAITING_NUMBER
+			}
+		}
+	]);
+
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("AMAZON.YesIntent"),
+			saysLike: Resources.text.sayNumberForDigits,
+			withSessionAttributes: {
+				dialogState: DIALOG_STATE.WAITING_RETRY_CONFRMATION
+			}
+		}
+	]);
+});
+
+describe ("No", () => {
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("AMAZON.NoIntent"),
+			saysLike: "The number of digits must be",
+			withSessionAttributes: {
+				dialogState: DIALOG_STATE.WAITING_DIGITS
+			}
+		}
+	]);
+
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("AMAZON.NoIntent"),
+			saysLike: Resources.text.incorrectAnswer,
+			withSessionAttributes: {
+				dialogState: DIALOG_STATE.WAITING_NUMBER
+			}
+		}
+	]);
+
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("AMAZON.NoIntent"),
+			saysLike: Resources.text.thanks,
+			withSessionAttributes: {
+				dialogState: DIALOG_STATE.WAITING_RETRY_CONFRMATION
+			},
+			shouldEndSession: true
+		}
+	]);
+	
+});

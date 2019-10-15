@@ -1,6 +1,4 @@
-// This sample demonstrates handling intents from an Alexa skill using the Alexa Skills Kit SDK (v2).
-// Please visit https://alexa.design/cookbook for additional examples on implementing slots, dialog management,
-// session persistence, api calls, and more.
+
 const Alexa = require('ask-sdk-core');
 const numberGenerator = require('./number_generator.js');
 const Resources = require('./resources.js');
@@ -12,9 +10,6 @@ const DIALOG_STATE = {
 }
 
 const helper = {
-    forceEnglish(text) {
-        return '<voice name="Joanna"><lang xml:lang="en-US">' + text + '</lang></voice>';
-    },
 
     askNumber(handlerInput) {
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
@@ -24,7 +19,7 @@ const helper = {
         sessionAttributes.numberToGuess=randomNumber;
         sessionAttributes.dialogState=DIALOG_STATE.WAITING_NUMBER;
             
-        var speakOutput = helper.forceEnglish(Resources.text.sayNumberForDigits + " <prosody rate=\"x-slow\"><say-as interpret-as=\"digits\">" + randomNumber + "</say-as></prosody>?");
+        var speakOutput = Resources.text.sayNumberForDigits + " <prosody rate=\"x-slow\"><say-as interpret-as=\"digits\">" + randomNumber + "</say-as></prosody>?";
         var speakReprompt = speakOutput;
 
         return handlerInput.responseBuilder
@@ -34,8 +29,8 @@ const helper = {
     },
     
     askForDigits(handlerInput) {
-        var speakOutput = helper.forceEnglish(Resources.text.howManyDigits);
-        var speakReprompt = helper.forceEnglish(Resources.text.numberInRange);
+        var speakOutput = Resources.text.howManyDigits;
+        var speakReprompt = Resources.text.numberInRange;
         
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         sessionAttributes.dialogState=DIALOG_STATE.WAITING_DIGITS;
@@ -57,10 +52,11 @@ const helper = {
     },
 
     incorrectAnswer(handlerInput) {
-        var speakOutput = helper.forceEnglish(Resources.text.incorrectAnswer + sessionAttributes.numberToGuess + ". " + Resources.text.tryAgain);
-        var speakReprompt = helper.forceEnglish(Resources.text.retry);
-
+        console.log("Dentro incorrect answer")
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        
+        var speakOutput = Resources.text.incorrectAnswer + sessionAttributes.numberToGuess + ". " + Resources.text.tryAgain;
+        var speakReprompt = Resources.text.retry;
 
         sessionAttributes.numberToGuess=null;
         sessionAttributes.dialogState=DIALOG_STATE.WAITING_RETRY_CONFRMATION;
@@ -77,8 +73,8 @@ const LaunchRequestHandler = {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'LaunchRequest';
     },
     handle(handlerInput) {
-        const speakOutput = helper.forceEnglish(Resources.text.practice);
-        const speaKReprompt = helper.forceEnglish(Resources.text.tellDigits);
+        const speakOutput = Resources.text.practice;
+        const speaKReprompt = Resources.text.tellDigits;
         
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         sessionAttributes.dialogState=DIALOG_STATE.WAITING_DIGITS;
@@ -98,18 +94,19 @@ const AskNumberIntentHandler = {
     handle(handlerInput) {
 
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-
-        // Si ya está definida la cantidad de cifras, es que el Intent no es el correcto
-        if (sessionAttributes.numberLength) {
+        
+        if (!sessionAttributes.dialogState && !handlerInput.requestEnvelope.request.intent.slots.digits) {
+            return helper.askForDigits(handlerInput);
+        } else if (sessionAttributes.dialogState && sessionAttributes.dialogState!==DIALOG_STATE.WAITING_DIGITS) {
             return helper.askAgain(handlerInput);
-               
+                   
         } else {
         
             var digitsNumber = parseInt(handlerInput.requestEnvelope.request.intent.slots.digits.value);
     
-            if (digitsNumber >= 2 && digitsNumber <= 6) {
+            if (digitsNumber >= Resources.MIN_DIGITS && digitsNumber <= Resources.MAX_DIGITS) {
                 sessionAttributes.numberLength=digitsNumber;        
-                return YesIntentHandler.handle(handlerInput);
+                return helper.askNumber(handlerInput);
             } else {
                 return helper.askForDigits(handlerInput);
             }
@@ -125,12 +122,32 @@ const ChangeDigitsIntentHandler = {
     handle(handlerInput) {
 
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-        if (handlerInput.requestEnvelope.request.intent.slots.digits.value) {
+        if (handlerInput.requestEnvelope.request.intent.slots.digits) {
             sessionAttributes.numberLength=handlerInput.requestEnvelope.request.intent.slots.digits.value;
             return helper.askNumber(handlerInput);
         } else {
             sessionAttributes.numberLength=null;
             return AskNumberIntentHandler.handle(handlerInput);
+        }
+
+    }
+};
+
+const OtherNumberIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'OtherNumberIntent';
+    },
+    handle(handlerInput) {
+
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        
+        if  (sessionAttributes.dialogState===DIALOG_STATE.WAITING_NUMBER) {
+            return helper.askNumber(handlerInput);
+        } else if (sessionAttributes.dialogState===DIALOG_STATE.WAITING_DIGITS) {
+            return helper.askForDigits(handlerInput);
+        } else {
+            return helper.askAgain(handlerInput)
         }
 
     }
@@ -143,16 +160,16 @@ const GuessNumberIntentHandler = {
     },
     handle(handlerInput) {
 
-        if (!handlerInput.attributesManager.getSessionAttributes().numberToGuess) {
+		const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+
+        if (sessionAttributes.dialogState===DIALOG_STATE.WAITING_DIGITS) {
             handlerInput.requestEnvelope.request.intent.slots.digits= handlerInput.requestEnvelope.request.intent.slots.guess;
             return AskNumberIntentHandler.handle(handlerInput);
         }
-		
-		const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-        
+
         var guess = handlerInput.requestEnvelope.request.intent.slots.guess.value;
 
-        if (sessionAttributes.DIALOG_STATE === DIALOG_STATE.WAITING_NUMBER) {
+        if (sessionAttributes.dialogState === DIALOG_STATE.WAITING_NUMBER) {
             if ( parseInt(guess) !== parseInt(sessionAttributes.numberToGuess) ) {
                 return helper.incorrectAnswer(handlerInput)
             } else {
@@ -160,8 +177,8 @@ const GuessNumberIntentHandler = {
                 sessionAttributes.numberToGuess=null;
                 sessionAttributes.dialogState=DIALOG_STATE.WAITING_RETRY_CONFRMATION
 
-                var speakOutput = helper.forceEnglish(Resources.text.correctAnswer);
-                var speakReprompt = helper.forceEnglish(Resources.text.retry);
+                var speakOutput = Resources.text.correctAnswer;
+                var speakReprompt = Resources.text.retry;
 
                 return handlerInput.responseBuilder
                     .speak(speakOutput)
@@ -181,9 +198,18 @@ const HelpIntentHandler = {
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.HelpIntent';
     },
     handle(handlerInput) {
-        const speakOutput = forceEnglish(Resources.text.help);
+        const speakOutput = Resources.text.help;
+        const speakReprompt = Resources.text.howManyDigits;
+        
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        
+        sessionAttributes.numberLength=null
+        sessionAttributes.dialogState=DIALOG_STATE.WAITING_DIGITS
 
-        return helper.askForDigits(handlerInput)
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt(speakReprompt)
+            .getResponse();    
 
     }
 };
@@ -196,12 +222,12 @@ const YesIntentHandler = {
     handle(handlerInput) {
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
-        if (sessionAttributes.dialogState==DIALOG_STATE.WAITING_NUMBER) {
-            return helper.incorrectAnswer(handlerInput);
-        } else if (sessionAttributes.dialogState==DIALOG_STATE.WAITING_DIGITS) {
-            return helper.askNumber(handlerInput);
-        } else {
+        if (sessionAttributes.dialogState===DIALOG_STATE.WAITING_DIGITS) {
             return helper.askForDigits(handlerInput);
+        } else if (sessionAttributes.dialogState===DIALOG_STATE.WAITING_NUMBER) {
+            return helper.incorrectAnswer(handlerInput);
+        } else {
+            return helper.askNumber(handlerInput);
         }
     }
 };
@@ -214,17 +240,14 @@ const NoIntentHandler = {
     handle(handlerInput) {
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
-        if (sessionAttributes.dialogState==DIALOG_STATE.WAITING_NUMBER) {
-            
-            return helper.incorrectAnswer(handlerInput);
-
-        } else if (sessionAttributes.dialogState==DIALOG_STATE.WAITING_DIGITS) {
-            
+        if (sessionAttributes.dialogState===DIALOG_STATE.WAITING_DIGITS) {
             return helper.askForDigits(handlerInput);
-
+        } else if (sessionAttributes.dialogState===DIALOG_STATE.WAITING_NUMBER) {
+            return helper.incorrectAnswer(handlerInput);
+            
         } else {
         
-            const speakOutput = helper.forceEnglish(Resources.text.thanks);
+            const speakOutput = Resources.text.thanks;
             return handlerInput.responseBuilder
                 .speak(speakOutput)
                 .getResponse();
@@ -239,7 +262,7 @@ const CancelAndStopIntentHandler = {
                 || Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.StopIntent');
     },
     handle(handlerInput) {
-        const speakOutput = helper.forceEnglish("Goodbye!");
+        const speakOutput = Resources.text.thanks;
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .getResponse();
@@ -304,6 +327,7 @@ exports.handler = Alexa.SkillBuilders.custom()
         GuessNumberIntentHandler,        
         AskNumberIntentHandler,
         ChangeDigitsIntentHandler,
+        OtherNumberIntentHandler,
         HelpIntentHandler,
         YesIntentHandler,
         NoIntentHandler,

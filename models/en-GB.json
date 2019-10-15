@@ -1,0 +1,93 @@
+
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "english numbers",
+            "intents": [
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AskNumberIntent",
+                    "slots": [
+                        {
+                            "name": "digits",
+                            "type": "AMAZON.NUMBER"
+                        }
+                    ],
+                    "samples": [
+                        "ask me a number",
+                        "a number",
+                        "a {digits} digits number",
+                        "{digits} digit",
+                        "yes a {digits} digits number",
+                        "ask me a {digits} digits number",
+                        "yes {digits} digits",
+                        "{digits} digits",
+                        "{digits}"
+                    ]
+                },
+                {
+                    "name": "GuessNumberIntent",
+                    "slots": [
+                        {
+                            "name": "guess",
+                            "type": "AMAZON.NUMBER"
+                        }
+                    ],
+                    "samples": [
+                        "the answer is {guess}",
+                        "{guess}"
+                    ]
+                },
+                {
+                    "name": "AMAZON.YesIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NoIntent",
+                    "samples": []
+                },
+                {
+                    "name": "ChangeDigitsIntent",
+                    "slots": [
+                        {
+                            "name": "digits",
+                            "type": "AMAZON.NUMBER"
+                        }
+                    ],
+                    "samples": [
+                        "change to {digits} digits",
+                        "change digits to {digits}",
+                        "change number of digits",
+                        "change digits"
+                    ]
+                },
+                {
+                    "name": "OtherNumber",
+                    "slots": [],
+                    "samples": [
+                        "try with a different one",
+                        "change number",
+                        "another one",
+                        "other number"
+                    ]
+                }
+            ],
+            "types": []
+        }
+    }
+}

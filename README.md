@@ -29,6 +29,7 @@ I decided to develop the lambda function in Javascript using node 8.10 as runtim
 The skill is very simple and neither database nor other AWS services but lambda itself are required.
 
 You can find below the VUI diagram
+![VUI](images/VUI.png)
 
 The project structure follows the standard proposed by Amazon
 
@@ -50,7 +51,7 @@ Things to add/improve:
 
 ## Resources
 
-* Jest
-* ASK
-* alexa-skill-test-framework
-* ssml 
+* [Jest](https://jestjs.io/)
+* [ASK](https://developer.amazon.com/en-US/alexa/alexa-skills-kit)
+* [Alex Skill test framework](https://github.com/BrianMacIntosh/alexa-skill-test-framework)
+* [SSML](https://developer.amazon.com/es/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html)

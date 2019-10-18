@@ -29,6 +29,7 @@ I decided to develop the lambda function in Javascript using node 8.10 as runtim
 The skill is very simple and neither database nor other AWS services but lambda itself are required.
 
 You can find below the VUI diagram
+<kbd><img src="https://github.com/sergiosamu/skill-numbers/blob/master/images/VUI.png" /></kbd>
 ![VUI](images/VUI.png)
 
 The project structure follows the standard proposed by Amazon

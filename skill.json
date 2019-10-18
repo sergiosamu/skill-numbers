@@ -3,7 +3,8 @@
     "apis": {
       "custom": {
         "endpoint": {
-          "uri": "arn:aws:lambda:us-east-1:270026072302:function:ask-custom-skill-vaughn-default"
+          "uri": "arn:aws:lambda:us-east-1:270026072302:function:ask-custom-skill-vaughn-default",
+          "sourceDir": "lambda/custom"
         },
         "interfaces": []
       }

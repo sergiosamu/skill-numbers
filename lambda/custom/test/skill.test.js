@@ -87,14 +87,25 @@ describe ("Ask digits request", () => {
 describe ("Try to guess number", () => {
 	alexaTest.test([
 		{
-			request: alexaTest.getIntentRequest("GuessNumberIntent",{guess:123}),
+			request: alexaTest.getIntentRequest("GuessNumberIntent",{guess:"27"}),
 			saysLike: "Awesome!! You nailed it",
 			withSessionAttributes: {
-				numberToGuess:123,
+				numberToGuess:27,
 				dialogState: DIALOG_STATE.WAITING_NUMBER
 			}
 		}
 	]);
+
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("GuessNumberIntent",{guess:27}),
+			saysLike: "Awesome!! You nailed it",
+			withSessionAttributes: {
+				numberToGuess:27,
+				dialogState: DIALOG_STATE.WAITING_NUMBER
+			}
+		}
+	]);	
 
 	alexaTest.test([
 		{
@@ -160,7 +171,7 @@ describe ("Other number", () => {
 				dialogState: DIALOG_STATE.WAITING_NUMBER
 			}
 		}
-	]);
+	]);	
 
 	alexaTest.test([
 		{
@@ -181,6 +192,7 @@ describe ("Other number", () => {
 			}
 		}
 	]);
+
 });
 
 describe ("Help", () => {
@@ -260,4 +272,24 @@ describe ("No", () => {
 		}
 	]);
 	
+});
+
+describe ("Cancel", () => {
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("AMAZON.CancelIntent"),
+			saysLike: Resources.text.thanks,
+			shouldEndSession: true
+		}
+	]);
+
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("AMAZON.StopIntent"),
+			saysLike: Resources.text.thanks,
+			shouldEndSession: true
+		}
+	]);
+
+
 });

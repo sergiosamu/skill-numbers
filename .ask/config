@@ -9,7 +9,7 @@
           "eTag": "6481abb0fd898771ec57479b5cf9790f"
         },
         "interactionModel": {
-          "en-US": {
+          "en-GB": {
             "eTag": "948159d2831c985e0b99efab1cf5f1bc"
           }
         },
@@ -23,7 +23,7 @@
             "codeUri": "lambda/custom",
             "functionName": "ask-custom-skill-vaughn-default",
             "handler": "index.handler",
-            "revisionId": "057b9141-2fba-4f6c-a920-194734dc4bc8",
+            "revisionId": "bbd744e1-7939-4d2f-a63c-e0408421a93e",
             "runtime": "nodejs8.10"
           }
         ]

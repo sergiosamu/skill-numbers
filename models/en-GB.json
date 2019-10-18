@@ -1,4 +1,3 @@
-
 {
     "interactionModel": {
         "languageModel": {
@@ -77,7 +76,7 @@
                     ]
                 },
                 {
-                    "name": "OtherNumber",
+                    "name": "OtherNumberIntent",
                     "slots": [],
                     "samples": [
                         "try with a different one",

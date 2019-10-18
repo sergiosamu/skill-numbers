@@ -1,33 +1,56 @@
-# Build An Alexa Hello World Skill
-<img src="https://m.media-amazon.com/images/G/01/mobile-apps/dex/alexa/alexa-skills-kit/tutorials/quiz-game/header._TTH_.png" />
+# Alexa Practice Numbers Skill
 
-### This is a simple tutorial to introduce a simple Alexa skill and code.
+## Introduction
 
-## Skill Architecture
-Each skill consists of two basic parts, a front end and a back end.
-The front end is the voice interface, or VUI.
-The voice interface is configured through the voice interaction model.
-The back end is where the logic of your skill resides.
+This is not my first contact with Alexa Skills. Some time ago I developed a more complex skill that this one that allowed you to get information about movie showtimes. The difference with this one is that I neither finished it nor got certified.
 
-## Three Options for Skill Setup
-There are a number of different ways for you to setup your skill, depending on your experience and what tools you have available.
+I wanted to develop a simple skill to learn the basics and go through the certification process and publish it wihout requiring a lot of time.
 
- * If this is your first skill, choose the [Alexa-Hosted backend instructions](./instructions/setup-vui-alexa-hosted.md) to get started quickly.
- * If you want to manage the backend resources in your own AWS account, you can follow the [AWS-Hosted instructions](./instructions/setup-vui-aws-hosted.md).
- * Developers with the ASK Command Line Interface configured may follow the [ASK CLI instructions](./instructions/cli.md).
+When developing this skill I aimed for these goals:
 
----
+* Have fun developing a Voice User Interface (VUI)
+* Practice with Javascript language
+* Try Jest framework for unit testing
+* Develop and deploy with a command line framework instead of working directly with AWS Console
+* Integrate the skill in a CI/CD pipeline
 
-## Additional Resources
+## About the Skill
 
-### Community
-* [Amazon Developer Forums](https://forums.developer.amazon.com/spaces/165/index.html) - Join the conversation!
-* [Hackster.io](https://www.hackster.io/amazon-alexa) - See what others are building with Alexa.
+My mother tongue is not english and the reason of developing this skill was a Vaughn english exercise that always makes me struggle. The exercise consists in the teacher saying a number of random digits (normally four) and the student has to answer with the full number.
 
-### Tutorials & Guides
-* [Voice Design Guide](https://developer.amazon.com/designing-for-voice/) - A great resource for learning conversational and voice user interface design.
-* [Codecademy: Learn Alexa](https://www.codecademy.com/learn/learn-alexa) - Learn how to build an Alexa Skill from within your browser with this beginner friendly tutorial on Codecademy!
+For example the answer to 4-5-1-3 would be four thousand five hundred and thirteen.
 
-### Documentation
-* [Official Alexa Skills Kit Node.js SDK](https://www.npmjs.com/package/ask-sdk) - The Official Node.js SDK Documentation
-*  [Official Alexa Skills Kit Documentation](https://developer.amazon.com/docs/ask-overviews/build-skills-with-the-alexa-skills-kit.html) - Official Alexa Skills Kit Documentation
+I have always struggled with this exercise because as I'm saying the number I forgot the last digits. Since the best way to improve is to rehearshal, what could be a better way than having an Alexa Skill acting as teacher? ;-)
+
+### Skill Architecture
+
+I decided to develop the lambda function in Javascript using node 8.10 as runtime.
+
+The skill is very simple and neither database nor other AWS services but lambda itself are required.
+
+You can find below the VUI diagram
+
+The project structure follows the standard proposed by Amazon
+
+Regarding testing I have chosen Jest because it is on fire at this moment and I wanted to give it a try. Tests are created using alexa-skill-test-framework as testing framework.
+
+## Conclusions
+
+The part I enjoyed the most was creating the voice interface.
+
+The ASK is a nice tool that allows you to deploy both the skill and the lambda function with very simple commands.
+
+The certification process is not hard and I got the skill certificed at the second attempt. The first time it was rejected because of a couple of bugs in the dialog model that were overlooked by unit tests.
+
+Things to add/improve:
+
+* Add integration tests using Bespoken framework
+* Manage the dialog model using built-in features instead of handling it with session attributes
+* Automate deployment using Travis CI
+
+## Resources
+
+* Jest
+* ASK
+* alexa-skill-test-framework
+* ssml 

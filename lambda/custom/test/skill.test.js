@@ -160,6 +160,16 @@ describe ("Change digits", () => {
 			}
 		}
 	]);
+
+	alexaTest.test([
+		{
+			request: alexaTest.getIntentRequest("ChangeDigitsIntent",{digits:null}),
+			saysLike: "The number of digits",
+			hasAttributes: {
+				numberLength: null
+			}
+		}
+	]);	
 });
 
 describe ("Other number", () => {

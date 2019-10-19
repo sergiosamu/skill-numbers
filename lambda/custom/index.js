@@ -122,7 +122,7 @@ const ChangeDigitsIntentHandler = {
     handle(handlerInput) {
 
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-        if (handlerInput.requestEnvelope.request.intent.slots.digits) {
+        if (handlerInput.requestEnvelope.request.intent.slots.digits && handlerInput.requestEnvelope.request.intent.slots.digits.value) {
             sessionAttributes.numberLength=handlerInput.requestEnvelope.request.intent.slots.digits.value;
             return helper.askNumber(handlerInput);
         } else {
